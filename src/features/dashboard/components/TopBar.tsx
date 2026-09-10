@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MobileNav } from './MobileNav'
-import { useSessionStore } from '@features/dal/sessionStore'
+import { useSession } from '@/features/profile/hooks/useSession'
 export function TopBar() {
-  const user = useSessionStore((state) => state.user)
+  const { data: profile } = useSession()
+  if (!profile?.isAuth) return
+  const { name, avatar_alt, avatar_url } = profile.user
   return (
     <header className='flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6'>
       <div className='flex items-center gap-4'>
@@ -27,14 +29,14 @@ export function TopBar() {
         <div className='h-6 w-px bg-border' />
         <div className='flex items-center gap-3'>
           <Avatar className='h-8 w-8'>
-            <AvatarImage src='/favicon.png' alt={user?.name ?? 'User'} />
+            <AvatarImage src={avatar_url ?? ''} alt={avatar_alt ?? 'User'} />
             <AvatarFallback className='bg-secondary text-xs font-medium'>
               ML
             </AvatarFallback>
           </Avatar>
           <div className='hidden sm:block'>
             <p className='text-sm font-medium text-foreground'>
-              {user?.name ?? 'User'}
+              {name ?? 'User'}
             </p>
             <p className='text-xs text-muted-foreground'>Frontend Developer</p>
           </div>

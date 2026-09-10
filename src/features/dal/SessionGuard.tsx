@@ -1,44 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser } from '@features/dal/session'
-import { useSessionStore } from './sessionStore'
+import Link from 'next/link'
+import { useSession } from '../profile/hooks/useSession'
 
 export function SessionGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const { isLoading, error, data } = useSession()
 
-  const setSession = useSessionStore((state) => state.setSession)
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const session = await getCurrentUser()
-
-        if (!session.isAuth) {
-          router.replace('/login')
-          return
-        }
-
-        setSession(session.user)
-        setLoading(false)
-      } catch (error) {
-        setError(true)
-        setLoading(false)
-      }
-    }
-
-    checkSession()
-  }, [router, setSession])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className='flex min-h-screen items-center justify-center'>
         <div className='flex flex-col items-center gap-3'>
           <div className='size-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary' />
+
           <p className='text-sm text-muted-foreground'>Verificando sesión...</p>
         </div>
       </div>
@@ -47,7 +23,7 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
 
   if (error) {
     return (
-      <div className='flex min-h-screen items-center justify-center'>
+      <div className='flex min-h-screen items-center justify-center px-4'>
         <div className='text-center'>
           <h2 className='text-lg font-semibold'>
             No pudimos verificar tu sesión
@@ -56,9 +32,21 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
           <p className='mt-2 text-sm text-muted-foreground'>
             Ocurrió un error al conectar con el servidor.
           </p>
+
+          <Link
+            href='/login'
+            className='mt-6 inline-flex items-center rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground shadow-sm transition-all hover:bg-accent/90 hover:shadow-md'
+          >
+            Volver al inicio de sesión
+          </Link>
         </div>
       </div>
     )
+  }
+
+  if (!data?.isAuth) {
+    router.replace('/login')
+    return null
   }
 
   return children

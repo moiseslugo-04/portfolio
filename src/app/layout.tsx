@@ -6,6 +6,7 @@ import { ThemeProvider } from '@features/theme/components/theme-provider'
 import { Footer } from '@/components/Footer'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
+import { QueryProvider } from './providers/QueryProvider'
 export const metadata: Metadata = {
   title: 'Moises Lugo | Junior Full Stack Developer',
   description:
@@ -91,11 +92,29 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-            {/* Main content */}
+          {/* Main content */}
+          <QueryProvider>
             <main className='flex-1'>{children}</main>
+          </QueryProvider>
           {/* Footer always at bottom */}
         </ThemeProvider>
-        <Toaster />
+        <Toaster
+          position='top-center'
+          toastOptions={{
+            classNames: {
+              toast:
+                '!w-full !max-w-md !rounded-xl !border !bg-white !px-5 !py-4 !shadow-lg',
+
+              title: '!text-sm !font-semibold !text-gray-900',
+
+              description: '!mt-1 !text-sm !text-gray-500',
+
+              success: '!border-green-200 !bg-green-50',
+
+              error: '!border-red-200 !bg-red-50',
+            },
+          }}
+        />
       </body>
     </html>
   )

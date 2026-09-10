@@ -11,13 +11,12 @@ type ProfileDTO = {
   email: string
   username: string
   bio: string | null
-  avatar_id: string | null
-  avatar_url: string | null
-  avatar_alt: string | null
+  avatar_id: string | null | undefined
+  avatar_url: string | null | undefined
+  avatar_alt: string | null | undefined
 }
-type SessionResponse = {
-  isAuth: boolean
-  user: ProfileDTO | null
-}
+type SessionResponse =
+  | { isAuth: true; user: ProfileDTO }
+  | { isAuth: false; user: null }
 
 export type { User, ProfileDTO, SessionResponse }

@@ -30,8 +30,8 @@ export function useLogin() {
         body: JSON.stringify(data),
       })
       if (response.status === 401) throw new Error('Unauthorized')
-      //  if (response?.ok) return router.push('/admin')
-      //throw new Error('Login failed')
+      if (response?.ok) return router.push('/admin')
+      throw new Error('Login failed')
     } catch (error) {
       return error instanceof Error
         ? setError('Invalid Credentials')

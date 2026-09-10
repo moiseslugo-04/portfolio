@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from app.services import users as users_services
 from app.schemas.users import  UserAvatarSchema, UserCreateSchema,UserUpdateSchema
 from app.auth.session import get_session
-
+import asyncio
 router = APIRouter(prefix='/users',tags=['Users'])
 
 ## GET
@@ -23,8 +23,9 @@ def get_user_by_identifier_route(identifier):
 
 # upload user avatar 
 @router.post('/me/avatar')
-def upload_user_avatar(file:UploadFile =File(...),alt:str = Form(...) ,session=Depends(get_session)):
+async def upload_user_avatar(file:UploadFile =File(...),alt:str = Form(...) ,session=Depends(get_session)):
     user_id = session['sub']
+  
     return users_services.upload_user_avatar(user_id, file, alt)
 
 # update user avatar 
