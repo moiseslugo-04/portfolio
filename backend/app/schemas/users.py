@@ -36,7 +36,7 @@ class UserUpdateSchema(BaseModel):
     email:str  = None
     username:str  = None
     bio:str  = None
-    
+    job_title:str = None 
     @field_validator('email')
     @classmethod
     def validate_email(cls, value,info: ValidationInfo):

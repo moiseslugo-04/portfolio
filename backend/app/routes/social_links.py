@@ -12,8 +12,9 @@ def get_social_links_by_user_id(user_id):
     return social_links_services.get_by_user_id(user_id)
 
 # POST
-@router.post('/{user_id}')
-def create_social_link(user_id,data:SocialLinkSchema):
+@router.post('/')
+def create_social_link(data:SocialLinkSchema,session=Depends(get_session)):
+    user_id = session['sub']
     return social_links_services.create(user_id,data)
 
 #PATH
@@ -22,11 +23,12 @@ def update_social_link(
     link_id,
     data:SocialLinkPartialSchema,
     session=Depends(get_session)):
-    print(session,data)
     user_id =session['sub']
-    return social_links_services.update(link_id,user_id,data)
+    return social_links_services.update(user_id,link_id,data.model_dump(exclude_unset=True))
 
 #DELETE 
 @router.delete('/{link_id}')
-def delete_social_link():
-    return {'message':'social link was deleted successful'}
+def delete_social_link(link_id,session=Depends(get_session)):
+    user_id = session['sub']
+    print(link_id,user_id)
+    return social_links_services.delete_by_id(link_id,user_id)

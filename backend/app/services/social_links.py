@@ -23,28 +23,64 @@ def create(user_id, data: SocialLinkSchema):
 
 
 
+def update(user_id, link_id, data: dict):
 
-def update(user_id,link_id, data: SocialLinkPartialSchema):
-    query = """
-        UPDATE social_links 
-        SET platform_name = %s, platform_url = %s 
-        WHERE id = %s AND user_id = %s 
-        RETURNING id, user_id, platform_name, platform_url;
-    """
-    
-    
-    existing_social_link = execute_query('SELECT id FROM social_links WHERE user_id = %s AND id = %s', (user_id,link_id), fetchone=True)
-    social_link_with_same_name = execute_query('SELECT id FROM social_links WHERE user_id = %s AND platform_name = %s AND id != %s', (user_id, data.name, link_id), fetchone=True)
+    existing_social_link = execute_query(
+        '''
+        SELECT id
+        FROM social_links
+        WHERE user_id = %s AND id = %s 
+        ''',
+        (user_id, link_id),
+        fetchone=True
+    )
+
     if not existing_social_link:
-        raise NotFoundError(f"Social link with ID '{link_id}' not found for user '{user_id}'")
-    if social_link_with_same_name:
-        raise ConflictError(f"Social link for platform '{data.name}' already exists for user '{user_id}'")
-    return execute_query(
-                query, 
-                (data.name, str(data.url), link_id, user_id), 
-                fetchone=True
+        raise NotFoundError(
+            f"Social link with ID '{link_id}' not found for user '{user_id}'"
+        )
+
+    if 'name' in data:
+        social_link_with_same_name = execute_query(
+            '''
+            SELECT id
+            FROM social_links
+            WHERE user_id = %s
+              AND platform_name = %s
+              AND id != %s
+            ''',
+            (user_id, data['name'], link_id),
+            fetchone=True
+        )
+
+        if social_link_with_same_name:
+            raise ConflictError(
+                f"Social link for platform '{data['name']}' already exists"
             )
 
+    fields = []
+    params = []
+
+    if 'name' in data:
+        fields.append('platform_name = %s')
+        params.append(data['name'])
+
+    if 'url' in data:
+        fields.append('platform_url = %s')
+        params.append(str(data['url']))
+
+    params.extend([link_id, user_id])
+
+    query = f'''
+        UPDATE social_links
+        SET {', '.join(fields)}
+        WHERE id = %s AND user_id = %s
+        RETURNING id, user_id, platform_name, platform_url;
+    '''
+
+    return execute_query(query, params, fetchone=True)
+    
+    
 def get_all():
     query = "SELECT id, user_id, platform_name, platform_url FROM social_links;"
     result = execute_query(query, fetchAll=True)
@@ -75,3 +111,9 @@ def get_by_user_id(user_id: str):
     if not social_link:
         raise NotFoundError(f"Social links for user with ID '{user_id}' not found")
     return social_link
+
+def delete_by_id(link_id,user_id):
+   query = 'DELETE FROM social_links WHERE id=%s AND user_id=%s RETURNING id'
+   deleted = execute_query(query,(link_id,user_id),fetchone=True)
+   if not deleted:
+    raise NotFoundError('Social Link not found')

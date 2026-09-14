@@ -28,9 +28,44 @@ def get_by_id(user_id:str):
     
 def get_profile(user_id: str):
     
-    query ='''SELECT u.id,u.name,u.username,u.email,u.bio,u.job_title,u.created_at,u.updated_at,
-            a.id AS avatar_id,a.image_url AS avatar_url,a.alt AS avatar_alt  FROM users u  
-            LEFT JOIN user_avatars a ON a.user_id = u.id  WHERE u.id = %s;'''
+    query ='''SELECT
+    u.id,
+    u.name,
+    u.username,
+    u.email,
+    u.bio,
+    u.job_title,
+    u.created_at,
+    u.updated_at,
+
+    a.id AS avatar_id,
+    a.image_url AS avatar_url,
+    a.alt AS avatar_alt,
+
+    COALESCE(
+        (
+            SELECT json_agg(
+                json_build_object(
+                    'id', s.id,
+                    'platform_name', s.platform_name,
+                    'platform_url', s.platform_url
+                )
+            )
+            FROM social_links s
+            WHERE s.user_id = u.id
+        ),
+        '[]'::json
+    ) AS social_links
+
+FROM users u
+
+LEFT JOIN user_avatars a
+    ON a.user_id = u.id
+
+WHERE u.id = %s;'''
+
+
+
     return execute_query(
         query,
         (user_id,),
@@ -62,7 +97,6 @@ def update_user(user_id:str,data:UserUpdateSchema):
     key_values = ', '.join(fields)
     
     query = f"UPDATE users SET {set_clause} WHERE id=%s RETURNING {key_values} "
-    
     return execute_query(query,(*values,user_id),fetchone=True)
 
 #upload user avatar

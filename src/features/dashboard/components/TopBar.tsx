@@ -9,7 +9,7 @@ import { useSession } from '@/features/profile/hooks/useSession'
 export function TopBar() {
   const { data: profile } = useSession()
   if (!profile?.isAuth) return
-  const { name, avatar_alt, avatar_url } = profile.user
+  const { name, avatar_alt, avatar_url, job_title } = profile.user
   return (
     <header className='flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6'>
       <div className='flex items-center gap-4'>
@@ -38,7 +38,7 @@ export function TopBar() {
             <p className='text-sm font-medium text-foreground'>
               {name ?? 'User'}
             </p>
-            <p className='text-xs text-muted-foreground'>Frontend Developer</p>
+            <p className='text-xs text-muted-foreground'>{job_title}</p>
           </div>
         </div>
       </div>

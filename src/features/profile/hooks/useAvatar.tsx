@@ -77,7 +77,6 @@ export function useAvatar() {
 
     onSuccess: (result, _variables, _onMutateResult, context) => {
       setIsEditable(false)
-
       const image = new Image()
 
       image.onload = () => {
