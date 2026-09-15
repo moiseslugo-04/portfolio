@@ -12,82 +12,13 @@ import {
 import { Field, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useMutation } from '@tanstack/react-query'
-import { socialLinkSchema } from './schemas'
-import { useState } from 'react'
-import { API_URL } from '@/app/config/env'
-import type { MutationFunctionContext } from '@tanstack/react-query'
-import { SessionResponse, SocialLink } from '../dal/types'
-import { toast } from 'sonner'
+
 import { PencilIcon } from 'lucide-react'
+import { useUpdateSocialLink } from './hooks/useUpdateSocialLink'
+import { SocialLink } from '../dal/types'
 
-type EditLinkType = { url: string; id: string }
 export function EditSocialForm({ link }: { link: SocialLink }) {
-  const [error, setError] = useState<string | null>(null)
-  const [open, setOpen] = useState(false)
-  async function updateSocialLink(data: EditLinkType) {
-    const endpoint = `${API_URL}/social_links/${link.id}`
-
-    const response = await fetch(endpoint, {
-      credentials: 'include',
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: data.url }),
-    })
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`)
-    const result = await response.json()
-    return result
-  }
-  function optimisticUpdate(
-    data: EditLinkType,
-    context: MutationFunctionContext
-  ) {
-    const previousSession = context.client.getQueryData(['session'])
-
-    context.client.setQueryData<SessionResponse>(['session'], (old) => {
-      if (!old?.isAuth) return old
-      return {
-        ...old,
-        user: {
-          ...old.user,
-          social_links: old.user.social_links.map((link) => {
-            if (link.id === data.id) {
-              return { ...link, platform_url: data.url }
-            }
-            return link
-          }),
-        },
-      }
-    })
-    return { previousSession, id: data.id }
-  }
-
-  const mutation = useMutation({
-    mutationFn: updateSocialLink,
-    onMutate: optimisticUpdate,
-    onSuccess: (result, _err, onMutation, context) => {
-      toast.success('Data saved')
-    },
-    onError: (_errors, _value, result, context) => {
-      toast.error('Something was Wrong please Tray again later ')
-      console.log(_errors, result)
-      if (!result?.previousSession) return
-      context.client.setQueryData(['session'], result.previousSession)
-    },
-  })
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    formData.append('id', link.id)
-    const data = Object.fromEntries(formData) as EditLinkType
-    const urlSchema = socialLinkSchema.pick({ url: true })
-    const result = urlSchema.safeParse({ url: data.url })
-    if (!result.success) return setError(result.error.issues[0]?.message)
-    setError(null)
-    setOpen(false)
-    mutation.mutate(data)
-  }
-
+  const { handleSubmit, setOpen, open, error } = useUpdateSocialLink({ link })
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>

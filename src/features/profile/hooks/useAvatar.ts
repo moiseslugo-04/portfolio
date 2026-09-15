@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useSession } from './useSession'
 import { useMutation } from '@tanstack/react-query'
 import { SessionResponse } from '@/features/dal/types'
-import { API_URL } from '@/app/config/env'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 export function useAvatar() {
   const { data: profile } = useSession()
 
@@ -30,14 +30,8 @@ export function useAvatar() {
     mutationFn: async (formData: FormData) => {
       const imageAlt = `Profile Avatar of ${name}`
       formData.append('alt', imageAlt)
-      const response = await fetch(`${API_URL}/users/me/avatar`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error(`Request failed: ${response.status}`)
-      const { image_url } = await response.json()
+      const response = await api.post('/users/me/avatar', formData)
+      const { image_url } = response.data
       return { image_url, alt: imageAlt }
     },
 

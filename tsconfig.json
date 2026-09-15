@@ -34,7 +34,7 @@
     ".next/types/**/*.ts",
     "src/types/**/*.d.ts",
     ".next/dev/types/**/*.ts",
-    "src/features/profile/hooks/useAvatar.tsx"
+    "src/features/profile/hooks/useAvatar.ts"
   ],
   "exclude": ["node_modules"]
 }

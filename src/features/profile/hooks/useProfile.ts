@@ -1,11 +1,10 @@
 import { useState, useRef } from 'react'
 import { useSession } from './useSession'
 import { useMutation } from '@tanstack/react-query'
-import { API_URL } from '@/app/config/env'
 import { SessionResponse } from '@/features/dal/types'
 import { toast } from 'sonner'
 import { updateProfileSchema } from '../schemas'
-const endpoint = `${API_URL}/users/`
+import { api } from '@/lib/api'
 export function useProfile() {
   const formRef = useRef<HTMLFormElement>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -17,18 +16,8 @@ export function useProfile() {
   const handleEdit = () => setIsEditable(!isEditable)
   const updateUserProfile = async (formData: FormData) => {
     const parseData = updateProfileSchema.parse(Object.fromEntries(formData))
-
-    const response = await fetch(endpoint, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'PATCH',
-      credentials: 'include',
-      body: JSON.stringify(parseData),
-    })
-    if (!response.ok) throw new Error(`Request failed: ${response.status}`)
-    const result = await response.json()
-    return result
+    const response = await api.patch('/users/', parseData)
+    return response.data
   }
   const mutation = useMutation({
     mutationFn: updateUserProfile,

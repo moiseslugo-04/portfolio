@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useForm } from '@features/auth/hooks/useForm'
 import { loginSchema, LoginSchema } from '@features/auth/schema/auth'
 import { useRouter } from 'next/navigation'
-import { API_URL } from '@/app/config/env'
+import { api } from '@/lib/api'
+import axios from 'axios'
 export function useLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -20,22 +21,17 @@ export function useLogin() {
   const handleSubmit = form.handleSubmit(async (data) => {
     setLoading(true)
     setError(null)
+
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      if (response.status === 401) throw new Error('Unauthorized')
-      if (response?.ok) return router.push('/admin')
-      throw new Error('Login failed')
+      await api.post('/auth/login', data)
+
+      router.push('/admin')
     } catch (error) {
-      return error instanceof Error
-        ? setError('Invalid Credentials')
-        : setError('Login failed Please try again')
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setError('Invalid Credentials')
+      } else {
+        setError('Login failed. Please try again')
+      }
     } finally {
       setLoading(false)
     }
