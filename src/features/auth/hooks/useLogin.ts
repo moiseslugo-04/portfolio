@@ -24,7 +24,10 @@ export function useLogin() {
 
     try {
       await api.post('/auth/login', data)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 28ad57f (refactor: refactor social links CRUD and add Axios to profile settings)
       router.push('/admin')
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
