@@ -21,7 +21,9 @@ def get_user_me(session=Depends(get_session)):
 def get_user_by_identifier_route(identifier):
     return users_services.get_by_identifier(identifier)
 
-# upload user avatar 
+
+# upload user avatar
+
 @router.post('/me/avatar')
 async def upload_user_avatar(
     file: UploadFile = File(...),
@@ -29,15 +31,28 @@ async def upload_user_avatar(
     session=Depends(get_session)
 ):
     try:
+        print('ROUTE 1 - Avatar endpoint called')
+
         user_id = session['sub']
 
-        return users_services.upload_user_avatar(
+        print('ROUTE 2 - Session user_id obtained')
+
+        result = users_services.upload_user_avatar(
             user_id,
             file,
             alt
         )
 
+        print('ROUTE 3 - Service completed')
+
+        return result
+
     except Exception as e:
+        import traceback
+
+        print('ROUTE ERROR - Avatar upload failed')
+        traceback.print_exc()
+
         return {
             'error': str(e),
             'type': type(e).__name__
