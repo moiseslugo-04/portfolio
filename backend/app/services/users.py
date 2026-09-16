@@ -104,7 +104,6 @@ def update_user(user_id:str,data:UserUpdateSchema):
 
 def upload_user_avatar(user_id: str, file: UploadFile, alt: str):
 
-    print('1 - Starting avatar upload')
 
     query = '''
         INSERT INTO user_avatars
@@ -119,7 +118,6 @@ def upload_user_avatar(user_id: str, file: UploadFile, alt: str):
         RETURNING id, image_url, public_id, alt
     '''
 
-    print('2 - Query defined')
 
     response = execute_query(
         'SELECT public_id FROM user_avatars WHERE user_id=%s',
@@ -127,13 +125,9 @@ def upload_user_avatar(user_id: str, file: UploadFile, alt: str):
         fetchone=True
     )
 
-    print('3 - Previous avatar query executed')
-    print('3.1 - Previous avatar exists:', bool(response))
 
     image = cloudinary_services.upload_image(file)
 
-    print('4 - Cloudinary upload completed')
-    print('4.1 - Image uploaded:', bool(image))
 
     result = execute_query(
         query,
@@ -146,15 +140,9 @@ def upload_user_avatar(user_id: str, file: UploadFile, alt: str):
         fetchone=True
     )
 
-    print('5 - Avatar database query executed')
-    print('5.1 - Database result:', bool(result))
 
     if result and response:
-        print('6 - Deleting previous Cloudinary image')
         cloudinary_services.delete_image(response['public_id'])
-        print('6.1 - Previous image deleted')
-
-    print('7 - Avatar upload completed')
 
     return {
         'image_url': image['image_url'],

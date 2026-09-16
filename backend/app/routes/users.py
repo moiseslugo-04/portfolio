@@ -31,19 +31,14 @@ async def upload_user_avatar(
     session=Depends(get_session)
 ):
     try:
-        print('ROUTE 1 - Avatar endpoint called')
 
         user_id = session['sub']
-
-        print('ROUTE 2 - Session user_id obtained')
-
         result = users_services.upload_user_avatar(
             user_id,
             file,
             alt
         )
 
-        print('ROUTE 3 - Service completed')
 
         return result
 
