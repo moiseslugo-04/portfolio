@@ -100,34 +100,40 @@ def update_user(user_id:str,data:UserUpdateSchema):
     return execute_query(query,(*values,user_id),fetchone=True)
 
 #upload user avatar
-def upload_user_avatar(user_id:str,file:UploadFile,alt:str):
-    
-    query = '''
-    INSERT INTO user_avatars
-        (user_id, image_url, public_id, alt)
-    VALUES
-        (%s, %s, %s, %s)
-    ON CONFLICT (user_id)
-    DO UPDATE SET
-        image_url = EXCLUDED.image_url,
-        public_id = EXCLUDED.public_id,
-        alt = EXCLUDED.alt
-    RETURNING id, image_url, public_id, alt
-    '''
+def upload_user_avatar(user_id: str, file: UploadFile, alt: str):
+    print('1 - Entró al servicio')
 
-    response = execute_query('SELECT public_id FROM user_avatars WHERE user_id=%s',(user_id,),fetchone=True)
-    
+    response = execute_query(
+        'SELECT public_id FROM user_avatars WHERE user_id=%s',
+        (user_id,),
+        fetchone=True
+    )
+
+    print('2 - SELECT OK:', response)
+
     image = cloudinary_services.upload_image(file)
-    
-    result = execute_query(query,(user_id,image['image_url'],image['public_id'],alt),fetchone=True)
-    
+
+    print('3 - CLOUDINARY OK:', image)
+
+    result = execute_query(
+        query,
+        (
+            user_id,
+            image['image_url'],
+            image['public_id'],
+            alt
+        ),
+        fetchone=True
+    )
+
+    print('4 - INSERT OK:', result)
+
     if result and response:
         cloudinary_services.delete_image(response['public_id'])
-    
-    return  {
-        'image_url':image['image_url'],
-    }
 
+    return {
+        'image_url': image['image_url']
+    }
 #upload user avatar
 def update_user_avatar(user_id:str,image_url:str,alt:str):
     query = '''UPDATE user_avatars SET image_url=%s, alt=%s WHERE user_id=%s RETURNING id,image_url,alt'''

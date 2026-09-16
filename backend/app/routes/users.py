@@ -23,10 +23,25 @@ def get_user_by_identifier_route(identifier):
 
 # upload user avatar 
 @router.post('/me/avatar')
-async def upload_user_avatar(file:UploadFile =File(...),alt:str = Form(...) ,session=Depends(get_session)):
-    user_id = session['sub']
-  
-    return users_services.upload_user_avatar(user_id, file, alt)
+async def upload_user_avatar(
+    file: UploadFile = File(...),
+    alt: str = Form(...),
+    session=Depends(get_session)
+):
+    try:
+        user_id = session['sub']
+
+        return users_services.upload_user_avatar(
+            user_id,
+            file,
+            alt
+        )
+
+    except Exception as e:
+        return {
+            'error': str(e),
+            'type': type(e).__name__
+        }
 
 # update user avatar 
 @router.put('/me/avatar')
