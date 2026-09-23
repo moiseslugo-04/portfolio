@@ -7,7 +7,6 @@ import { SessionResponse, SocialLink } from '@features/dal/types'
 import { toast } from 'sonner'
 import { nanoid } from 'nanoid'
 import { api } from '@/lib/api'
-
 const socialLinks = [
   {
     name: 'LinkedIn',

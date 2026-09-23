@@ -5,9 +5,6 @@ from app.core.exceptions import NotFoundError,UnauthorizedError
 
 def  user_login(data:AuthLoginSchema):
     user = get_by_identifier(data.identifier)
-    if not user:
-        raise NotFoundError("User not found")
-    
     if not verify_password(data.password,user['password_hash']):
         raise UnauthorizedError("Invalid password")
     return user['id']

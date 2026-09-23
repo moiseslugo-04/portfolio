@@ -31,6 +31,7 @@ export function useAvatar() {
       const imageAlt = `Profile Avatar of ${name}`
       formData.append('alt', imageAlt)
       const response = await api.post('/users/me/avatar', formData)
+      console.log(response)
       const { image_url } = response.data
       return { image_url, alt: imageAlt }
     },
@@ -72,7 +73,6 @@ export function useAvatar() {
     onSuccess: (result, _variables, _onMutateResult, context) => {
       setIsEditable(false)
       const image = new Image()
-
       image.onload = () => {
         context.client.setQueryData<SessionResponse>(['session'], (old) => {
           if (!old?.isAuth) return old
@@ -94,7 +94,7 @@ export function useAvatar() {
         setTempUrl(null)
       }
 
-      image.onerror = () => {
+      image.onerror = (e) => {
         toast.error('Could not load the new avatar')
       }
 

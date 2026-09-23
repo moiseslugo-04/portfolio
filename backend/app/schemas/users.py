@@ -5,7 +5,7 @@ class UserCreateSchema(BaseModel):
     name:str
     email:str
     username:str
-    bio:str
+    bio:str = None
     password:str
     
     @field_validator('email')
@@ -22,10 +22,6 @@ class UserCreateSchema(BaseModel):
     def password_validator(cls, value):
         return validate_password(value)
     
-    @field_validator('bio')
-    @classmethod
-    def bio_validator(cls, value):
-        return validate_bio(value)
 
 class UserResponseSchema(BaseModel):
     username:str

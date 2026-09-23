@@ -1,16 +1,8 @@
-import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
-import { API_URL } from '@/app/config/env'
+import { useLogin } from '../hooks/useLogin'
 
 export function LogoutButton({ collapsed = false }: { collapsed?: boolean }) {
-  const router = useRouter()
-  const handleLogout = async () => {
-    const response = await fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-    if (response.ok) router.push('/login')
-  }
+  const { handleLogout } = useLogin()
   return (
     <div className='border-t border-border p-3'>
       <button

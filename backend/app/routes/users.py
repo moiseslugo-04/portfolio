@@ -1,29 +1,43 @@
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from app.services import users as users_services
+from app.repositories import users as user_repositories
 from app.schemas.users import  UserAvatarSchema, UserCreateSchema,UserUpdateSchema
 from app.auth.session import get_session
 import asyncio
+
+from app.core.exceptions import NotFoundError
 router = APIRouter(prefix='/users',tags=['Users'])
 
 ## GET
 @router.get('/')
 def get_users_route():
-    return users_services.get_all()
+    return user_repositories.get_all()
 
 
 # Get User 
 @router.get('/me')
 def get_user_me(session=Depends(get_session)):
     user_id = session['sub']
-    return users_services.get_profile(user_id)
+    return user_repositories.get_profile(user_id)
 
+# Get User by identifier
 @router.get('/by-identifier')
 def get_user_by_identifier_route(identifier):
     return users_services.get_by_identifier(identifier)
 
 
-# upload user avatar
+# Create User
 
+## POST
+@router.post('')
+def create_user(data:UserCreateSchema):
+    return users_services.create_user(data)
+    
+
+
+
+# upload user avatar
 @router.post('/me/avatar')
 async def upload_user_avatar(
     file: UploadFile = File(...),
@@ -38,8 +52,6 @@ async def upload_user_avatar(
             file,
             alt
         )
-
-
         return result
 
     except Exception as e:
@@ -72,10 +84,6 @@ def delete_user_avatar(session=Depends(get_session)):
 def get_user_by_id_route(user_id):
     return users_services.get_by_id(user_id)
 
-## POST
-@router.post('')
-def create_user(data_user:UserCreateSchema):
-    return {"message":f"User {data_user} create with success"}
 
 
 #PATCH
@@ -85,6 +93,9 @@ def update_partial_user( data:UserUpdateSchema,session=Depends(get_session)):
     return users_services.update_user(user_id,data.model_dump(exclude_unset=True))
  
 ## DELETE 
-@router.delete('/{user_id}')
+@router.delete('/')
 def delete_user(user_id:str):
-    return users_services.delete_by_id(user_id)
+    result = users_services.delete_user(user_id)
+    if not result :
+        raise NotFoundError("User not found")
+    return {'message':"User successfully deleted"}

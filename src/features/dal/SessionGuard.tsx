@@ -1,5 +1,5 @@
 'use client'
-
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from '../profile/hooks/useSession'
@@ -8,6 +8,13 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   const { isLoading, error, data } = useSession()
+
+  useEffect(() => {
+    if (!isLoading && !error && !data?.isAuth) {
+      console.log('run')
+      router.replace('login')
+    }
+  }, [isLoading, error, data?.isAuth])
 
   if (isLoading) {
     return (
@@ -45,9 +52,7 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!data?.isAuth) {
-    router.replace('/login')
     return null
   }
-
   return children
 }
